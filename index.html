@@ -45,9 +45,16 @@
     .container { padding: 0 1.25rem; max-width: 600px; margin: 0 auto; }
     .section-title {
       font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--text2);
-      margin: 1.5rem 0 0.6rem;
+      text-transform: uppercase; color: #ffffff;
+      margin: 1.5rem -1.25rem 0.75rem;
+      padding: 0.6rem 1.25rem;
+      width: calc(100% + 2.5rem);
     }
+    .section-title.c-purchase { background: #6D4FC2; }
+    .section-title.c-income { background: #0F6E56; }
+    .section-title.c-expenses { background: #BA7517; }
+    .section-title.c-totalcost { background: #2563A8; }
+    .section-title.c-breakdown { background: #555555; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     @media (max-width: 380px) { .grid2 { grid-template-columns: 1fr; } }
     .field { display: flex; flex-direction: column; gap: 4px; }
@@ -110,6 +117,9 @@
     .bsection + .bsection { border-top: 0.5px solid var(--border); }
     .bsection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
     .bsection-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text2); }
+    .bsection-label.c-income { color: #0F6E56; }
+    .bsection-label.c-expenses { color: #BA7517; }
+    .bsection-label.c-unpaid { color: #A32D2D; }
     .bsection-total { font-size: 14px; font-weight: 600; color: var(--text); }
     .brow { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
     .brow .blabel { color: var(--text2); padding-left: 8px; }
@@ -133,7 +143,7 @@
 
   <div class="container">
 
-    <p class="section-title">Precio y costes de adquisición</p>
+    <p class="section-title c-purchase" style="margin-top:0.5rem">Precio y costes de adquisición</p>
     <div class="grid2">
       <div class="field"><label>Precio del inmueble</label><div class="field-row"><input type="number" inputmode="decimal" id="precio" value="100000" oninput="calc()"><span class="unit">€</span></div></div>
       <div class="field"><label>Gastos de compra (ITP/AJD + notaría)</label><div class="field-row"><input type="number" inputmode="decimal" id="gastos_pct" value="10" step="0.5" oninput="calc()"><span class="unit">%</span></div></div>
@@ -148,12 +158,12 @@
       <div class="field"><label>Muebles y equipamiento</label><div class="field-row"><input type="number" inputmode="decimal" id="muebles" value="0" oninput="calc()"><span class="unit">€</span></div></div>
     </div>
 
-    <p class="section-title">Ingresos por alquiler</p>
+    <p class="section-title c-income">Ingresos por alquiler</p>
     <div class="grid2">
       <div class="field"><label>Renta mensual</label><div class="field-row"><input type="number" inputmode="decimal" id="renta" value="850" oninput="calc()"><span class="unit">€/mes</span></div></div>
     </div>
 
-    <p class="section-title">Gastos anuales</p>
+    <p class="section-title c-expenses">Gastos anuales</p>
     <div class="grid2">
       <div class="field"><label>IBI</label><div class="field-row"><input type="number" inputmode="decimal" id="ibi" value="200" oninput="calc()"><span class="unit">€/año</span></div></div>
       <div class="field"><label>Comunidad de propietarios</label><div class="field-row"><input type="number" inputmode="decimal" id="comunidad" value="70" oninput="calc()"><span class="unit">€/mes</span></div></div>
@@ -173,7 +183,10 @@
 
     <div class="results-grid" id="results"></div>
 
-    <p class="section-title" style="margin-top:1.25rem">Desglose anual</p>
+    <p class="section-title c-totalcost" style="margin-top:1.25rem">Coste total inmueble</p>
+    <div class="breakdown" id="breakdown-coste"></div>
+
+    <p class="section-title c-breakdown" style="margin-top:1.25rem">Desglose anual</p>
     <div class="breakdown" id="breakdown"></div>
 
   </div>
@@ -231,6 +244,27 @@
           <div class="mlabel">Payback</div>
           <div class="mval">${flujoNeto > 0 ? Math.round(payback) + ' años' : '—'}</div>
           <div class="msub">Recuperación inversión</div>
+        </div>
+        <div class="metric neutral">
+          <div class="mlabel">Coste total inmueble</div>
+          <div class="mval">${fmt(inversionTotal)}</div>
+          <div class="msub">Precio + gastos + reforma + muebles</div>
+        </div>
+      `;
+
+      const ivaComisionLabel = chk('iva_comision') ? ' + IVA' : '';
+
+      document.getElementById('breakdown-coste').innerHTML = `
+        <div class="bsection">
+          <div class="brow"><span class="blabel">Precio del inmueble</span><span class="bval">${fmt(precio)}</span></div>
+          <div class="brow"><span class="blabel">Gastos de compra (${v('gastos_pct')}%)</span><span class="bval">${fmt(gastosCompra)}</span></div>
+          <div class="brow"><span class="blabel">Comisión agencia (${v('comision_pct')}%${ivaComisionLabel})</span><span class="bval">${fmt(comision)}</span></div>
+          <div class="brow"><span class="blabel">Reformas y adaptación</span><span class="bval">${fmt(reforma)}</span></div>
+          <div class="brow"><span class="blabel">Muebles y equipamiento</span><span class="bval">${fmt(muebles)}</span></div>
+        </div>
+        <div class="btotal-row">
+          <span class="btotal-label">Coste total</span>
+          <span class="btotal-anual">${fmt(inversionTotal)}</span>
         </div>
       `;
 
