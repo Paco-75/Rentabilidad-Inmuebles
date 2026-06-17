@@ -1,4 +1,4 @@
-const CACHE = 'rentabilidad-v1';
+const CACHE = 'rentabilidad-v2';
 const ASSETS = [
   './',
   './index.html',
